@@ -1,33 +1,36 @@
 # plumber.R
 
-#* @preempt __first__
-#* @get /
-function(req, res) {
-  res$status <- 302
-  res$setHeader("Location", "./__docs__/")
-  res$body <- "Redirecting..."
-  res
-}
+#* @apiTitle Plumber Example API
 
-#* Echo back the input
-#* @param msg The message to echo
-#* @get /echo
-function(msg=""){
-  list(msg = paste0("The message is: '", msg, "'"))
-}
+#* Return trend of smittecases
+#* @param p Antall personer i kommunen
+#* @param x2 Antall smittede forrige to uker
+#* @param y antall smittede denne uke
+#* @get /smittetrend
+function(p,x2,y){
+  p <- as.numeric(p)
+  x2 <- as.numeric(x2)
+  y <- as.numeric(y)
+  alpha.pri <- 1 
+  beta.pri <- 7*p/10000 
 
-#* Plot a histogram
-#* @png
-#* @get /plot
-function(){
-  rand <- rnorm(100)
-  hist(rand)
-}
+  alpha.post <- alpha.pri + x2
+  beta.post <- 1.0/(2+1/beta.pri)
+  
 
-#* Return the sum of two numbers
-#* @param a The first number to add
-#* @param b The second number to add
-#* @post /sum
-function(a, b){
-  as.numeric(a) + as.numeric(b)
+  nbin.size <- alpha.post
+  nbin.prob <- 1.0/(1.0+beta.post)
+  
+
+  grense.opp <- qnbinom(p=0.95,size=nbin.size,prob=nbin.prob)
+  grense.ned <- qnbinom(p=0.05,size=nbin.size,prob=nbin.prob)
+  
+
+  if(y<grense.ned) {
+    list(msg = "Avtagende trend.")
+  } else if (y>=grense.ned & y<grense.opp) {
+      list(msg = " Stabil trend.")
+  } else if (y>=grense.opp) {
+    list(msg = " Okende trend.")
+  }
 }

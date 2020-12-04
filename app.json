@@ -1,7 +1,7 @@
 {
   "name": "heroku-docker-r-plumber-app",
   "stack": "container",
-  "description": "This is an example Plumber application, which uses heroku-docker-r for Heroku.",
+  "description": "API in R to determine trend in covid cases",
   "keywords": [
     "r",
     "plumber"
